@@ -1,11 +1,11 @@
 //Example_RGBMatrix.ino
 //By: Ryan Owens @ SparkFun Electronics
 // 
-//modified 24 Oct 2014
+//modified 27 Oct 2014
 //by Bobby Chan @ SparkFun Electronics
 
 // This is example code to output an array to 
-// the RGB Serial Backpack Matrix, set the position of
+// the RGB Serial Backpack Matrix and set the position of
 // a daisy chained matrix.
 
 //Define the "Normal" Colors
@@ -14,6 +14,7 @@
 #define GREEN   0x1C
 #define BLUE    0x03
 #define YELLOW  RED|GREEN
+#define ORANGE  0xFC
 #define MAGENTA RED|BLUE
 #define TEAL    BLUE|GREEN
 #define WHITE   (RED|GREEN|BLUE)-0xA0
@@ -32,7 +33,7 @@ const int num_matrix = 1; //define number of daisy chained matrices
 char color_buffer[64*num_matrix]; //final array
 
 //array to clear 1 matrix
-int blank[]={
+char blank[]={
   BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
   BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
   BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
@@ -50,7 +51,6 @@ void set_matrix(){
   spi_transfer(0x25); //command character % == 0x25
   spi_transfer(0x02); //set LED matrix to position in daisy chain, must be between 0x01-0x08
   digitalWrite(SLAVESELECT, HIGH); //Deactivate the RGB Matrix
-
 }
 
 int p = 0; //dot position
@@ -90,6 +90,7 @@ void color_test(){
   matrix_write();//write array of colors to matrix
   delay(100);  //allow some time for the final matrix to be seen  
 }
+
 void setup(){  
   //----------SPI BUS SETUP----------
   SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR1);	//Enable SPI HW, Master Mode, divide clock by 16
@@ -132,9 +133,8 @@ void matrix_write(){
   //Send the color buffer to the RGB Matrix
   delayMicroseconds(500);
 
-  for(int LED=0; LED<192; LED++){
-    //Note: Change LED max when using more matrices
-    spi_transfer(color_buffer[LED]);
+  for(int LED=0; LED<(64*num_matrix); LED++){
+    spi_transfer(color_buffer[LED]);//send what is in buffer to the matrices
   }
   delayMicroseconds(500);//allow some time for the serial data to be sent 
   digitalWrite(SLAVESELECT, HIGH); //Deactivate the RGB Matrix
